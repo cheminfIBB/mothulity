@@ -110,6 +110,8 @@ def main():
     parser.add_argument(action="store",
                         dest="files_directory",
                         metavar="path/to/files",
+                        default=".",
+                        nargs="?",
                         help="input directory path.")
     parser.add_argument("-o",
                         "--output",
@@ -162,7 +164,8 @@ def main():
                         "-")
     else:
         pass
-    left_n_right = left_n_right_generator(args.files_directory,
+    abs_inpath = (os.path.abspath(args.files_directory))
+    left_n_right = left_n_right_generator(abs_inpath,
                                           args.split_sign,
                                           args.files_extension,
                                           args.left_reads_sign,
