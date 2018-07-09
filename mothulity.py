@@ -205,6 +205,49 @@ def parse_html(input_file_name,
                 "script": str(soup.script)}
 
 
+
+def verify_input_dir(files_directory,
+                    mode = "illumina_PE",
+                    files_extension="fastq"):
+    """
+    Validates input directory:
+    - verifies if dir contains files required for analysis.
+
+    Parameters
+    -------
+    files_directory: str
+        Input directory path.
+    mode: str, default <illumina_PE>
+        Sequencing type & technology.
+        [At the moment only paired-end illumina is supported.]
+    files_extension: str, default <fastq>
+        Only file names with this extensions are consider as input files.
+    """
+    files_list = [ i for i in glob.glob(files_directory + "*." + files_extension) ]
+    if mode == "illumina_PE":
+        forward_marks = ["_R1", "-R1", "R1."]
+        backward_marks = ["_R2", "-R2", "R2."]
+        forward_fastq = [i for i in files_list if any(mark in i for mark in forward_marks)]
+        other_fastq = [i for i in files_list if i not in forward_fastq]
+        any_PE = False
+        for frd_file in forward_fastq:
+            bck_file = frd_file
+            for f, b in zip(forward_marks, backward_marks):
+                bck_file = bck_file.replace(f, b)
+            if os.path.isfile(bck_file):
+                # any_PE = validate_fastq(frd_file, bck_file)
+                any_PE = True
+            else:
+                print( bck_file + " not found.")
+                print("Reverse reads fire is missing "
+                " or forward and backward filenames do not match.\n")
+        if not any_PE:
+            print("Input directory does not contain paired-end illumina files.\n"
+            "Quitting...")
+            exit()
+    return
+
+
 def main():
     parser = argparse.ArgumentParser(prog="mothulity",
                                      usage="mothulity [OPTION]",
@@ -571,6 +614,7 @@ def main():
 # Validate if input and output directories exist and make them absolute paths.
     if os.path.exists(args.files_directory):
         files_directory_abs = "{}/".format(os.path.abspath(args.files_directory))
+        verify_input_dir(files_directory_abs)
     else:
         print "Input directory not found. Quitting..."
         exit()
