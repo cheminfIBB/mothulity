@@ -164,8 +164,8 @@ def main():
                         "-")
     else:
         pass
-    abs_inpath = (os.path.abspath(args.files_directory))
-    left_n_right = left_n_right_generator(abs_inpath,
+    files_directory_abs = "{}/".format(os.path.abspath(args.files_directory))
+    left_n_right = left_n_right_generator(files_directory_abs,
                                           args.split_sign,
                                           args.files_extension,
                                           args.left_reads_sign,
