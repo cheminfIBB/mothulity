@@ -17,6 +17,7 @@ import shelve
 import pandas as pd
 from bs4 import BeautifulSoup as bs
 import utilities
+from Bio import SeqIO
 
 reload(sys)
 sys.setdefaultencoding('utf8')
@@ -204,7 +205,42 @@ def parse_html(input_file_name,
         return {"div": str(soup.div),
                 "script": str(soup.script)}
 
+def isFastq(filename):
+    """
+    Validates input file format.
 
+    Parameters
+    -------
+    filename: str
+        File to validate.
+    """
+    try:
+        records = list(SeqIO.parse(filename, "fastq"))
+    except Exception as e:
+        print(e)
+        print(filename + " file is corrupted.\n")
+        return False
+    if len(records) == 0:
+        print(filename + " file does not containg proper fastq sequences.\n")
+        return False
+    return True
+
+def validate_PE_fq(frd_file, bck_file):
+    """
+    Validates fastq paired-end data files.
+
+    Parameters
+    -------
+    frd_file: str
+        File containing forward reads.
+    bck_file: str
+        File containing backward (reverse) reads.
+    """
+    valid_fastq = 0
+    for filename in [frd_file, bck_file]:
+        if isFastq(filename):
+            valid_fastq += 1
+    return True if valid_fastq == 2 else False
 
 def verify_input_dir(files_directory,
                     mode = "illumina_PE",
@@ -235,14 +271,13 @@ def verify_input_dir(files_directory,
             for f, b in zip(forward_marks, backward_marks):
                 bck_file = bck_file.replace(f, b)
             if os.path.isfile(bck_file):
-                # any_PE = validate_fastq(frd_file, bck_file)
-                any_PE = True
+                any_PE = validate_PE_fq(frd_file, bck_file)
             else:
                 print( bck_file + " not found.")
                 print("Reverse reads fire is missing "
                 " or forward and backward filenames do not match.\n")
         if not any_PE:
-            print("Input directory does not contain paired-end illumina files.\n"
+            print("Input directory does not contain valid paired-end illumina files.\n"
             "Quitting...")
             exit()
     return
