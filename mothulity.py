@@ -649,7 +649,6 @@ def main():
 # Validate if input and output directories exist and make them absolute paths.
     if os.path.exists(args.files_directory):
         files_directory_abs = "{}/".format(os.path.abspath(args.files_directory))
-        verify_input_dir(files_directory_abs)
     else:
         print "Input directory not found. Quitting..."
         exit()
@@ -709,6 +708,7 @@ def main():
             time.sleep(2)
             exit()
         else:
+            verify_input_dir(files_directory_abs)
             if os.path.isfile(align_database_abs) is False:
                 print "No align database found in {}. Quitting...".format(align_database_abs)
                 time.sleep(2)
