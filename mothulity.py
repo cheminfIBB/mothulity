@@ -244,7 +244,9 @@ def validate_PE_fq(frd_file, bck_file):
 
 def verify_input_dir(files_directory,
                     mode = "illumina_PE",
-                    files_extension="fastq"):
+                    extensions = {"illumina_PE" : ["fastq", "fq"]},
+                    forward_marks={'illumina_PE': ["_R1", "-R1", "R1."]},
+                    backward_marks={'illumina_PE': ["_R2", "-R2", "R2."]}):
     """
     Validates input directory:
     - verifies if dir contains files required for analysis.
@@ -256,13 +258,34 @@ def verify_input_dir(files_directory,
     mode: str, default <illumina_PE>
         Sequencing type & technology.
         [At the moment only paired-end illumina is supported.]
-    files_extension: str, default <fastq>
-        Only file names with this extensions are consider as input files.
+    extensions: dictionary, default
+                        <"illumina_PE" : ["fastq", "fq"]>
+        File extensions grouped by mode/technology,
+        by default for illumina_PE mode only files with extension "fastq" or "fq"
+        would be taken as input.
+    forward_marks: dictionary, default
+                        <'illumina_PE': ["_R1", "-R1", "R1."]>
+        Set of characters by which file names are recognized as forward reads
+        grouped by mode/technology.
+    backward_marks: dictionary, default
+                        <'illumina_PE': ["_R2", "-R2", "R2."]>
+        Set of characters by which file names are recognized as backward (reverse)
+        reads grouped by  mode/technology.
     """
-    files_list = [ i for i in glob.glob(files_directory + "*." + files_extension) ]
+    try:
+        files_extension = extensions[mode]
+    except:
+        print("Chosen mode %s does not have defined files extension." % mode)
+        print("Quiting...")
+        exit()
+    # Get list of all potential input files (by defined extension)
+    files_list = []
+    for extension in files_extension:
+        files_list += [i for i in glob.glob(files_directory + "*." + extension)]
+    # Input data validation (mode/technology based)
     if mode == "illumina_PE":
-        forward_marks = ["_R1", "-R1", "R1."]
-        backward_marks = ["_R2", "-R2", "R2."]
+        forward_marks = forward_marks["illumina_PE"]
+        backward_marks = backward_marks["illumina_PE"]
         forward_fastq = [i for i in files_list if any(mark in i for mark in forward_marks)]
         other_fastq = [i for i in files_list if i not in forward_fastq]
         any_PE = False
