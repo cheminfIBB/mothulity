@@ -27,6 +27,10 @@ script:
   - diff test_data/new_run/single_smpl/script/travis_job.sh travis_job.sh --ignore-blank-lines --ignore-trailing-space
   - mothulity.py test_data/analysis/single_smpl/shared_tax --dry-run -r bash -n analysis_travis_job --analysis-only
   - diff test_data/analysis/single_smpl/script/analysis_travis_job.sh analysis_travis_job.sh --ignore-blank-lines --ignore-trailing-space
+  - mothulity.py test_data --dry-run -r bash > test_no_fastq.log
+  - diff test_data/logs/no_fastq.log test_no_fastq.log --ignore-blank-lines --ignore-trailing-space
+  - mothulity.py test_data --dry-run -r bash --analysis-only > test_no_shared.log
+  - diff test_data/logs/no_shared.log test_no_shared.log --ignore-blank-lines --ignore-trailing-space
 
 notifications:
   email:
